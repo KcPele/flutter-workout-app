@@ -1,9 +1,13 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import "package:flutter_application_1/colors.dart";
+import 'package:flutter_application_1/pages/video_info.dart';
+import 'package:get/get.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,6 +17,19 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  List info = [];
+  _initData() async {
+    dynamic data = await rootBundle.loadString("json/info.json");
+    print(data);
+    info = json.decode(data);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,10 +97,15 @@ class _HomePageState extends State<HomePage> {
               SizedBox(
                 width: 5,
               ),
-              Icon(
-                Icons.arrow_forward,
-                size: 20,
-                color: AppColor.homePageIcons,
+              InkWell(
+                onTap: () {
+                  Get.to(() => VideoInfo());
+                },
+                child: Icon(
+                  Icons.arrow_forward,
+                  size: 20,
+                  color: AppColor.homePageIcons,
+                ),
               )
             ],
           ),
@@ -263,7 +285,48 @@ class _HomePageState extends State<HomePage> {
                     color: AppColor.homePageTitle),
               )
             ],
-          )
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          Expanded(
+              child: MediaQuery.removePadding(
+            removeTop: true,
+            context: context,
+            child: GridView.count(
+                crossAxisCount: 2,
+                children: List.generate(info.length, (index) {
+                  return Container(
+                    margin: EdgeInsets.all(10),
+                    height: 180,
+                    width: 180,
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(50),
+                        boxShadow: [
+                          BoxShadow(
+                              blurRadius: 3,
+                              offset: Offset(5, 5),
+                              color: AppColor.gradientSecond.withOpacity(0.1)),
+                          BoxShadow(
+                              blurRadius: 3,
+                              offset: Offset(-5, -5),
+                              color: AppColor.gradientSecond.withOpacity(0.1))
+                        ],
+                        image: DecorationImage(
+                            image: AssetImage(info[index]['img']))),
+                    child: Center(
+                        child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Text(
+                        info[index]['title'],
+                        style: TextStyle(
+                            fontSize: 20, color: AppColor.homePageDetail),
+                      ),
+                    )),
+                  );
+                })),
+          ))
         ]),
       ),
     );
